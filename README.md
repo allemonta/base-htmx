@@ -88,10 +88,6 @@ npm install
 
 # Avvia in modalità sviluppo (hot-reload)
 npm run dev
-
-# Oppure: compila e avvia il build
-npm run build
-npm start
 ```
 
 Il server sarà disponibile su **http://localhost:3000**.

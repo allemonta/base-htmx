@@ -2,10 +2,10 @@ type InputProps = {
     count: number
 }
 
-export default (props: InputProps) => {
-    // My compute
-    
+const Counter = (props: InputProps) => {
     return (
         <span> Count: {props.count} </span>
     )
 }
+
+export default Counter
