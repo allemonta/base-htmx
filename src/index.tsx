@@ -2,11 +2,16 @@ import Fastify from "fastify"
 import fastifyHtml from "@kitajs/fastify-html-plugin"
 import { readFileSync, statSync, existsSync } from "node:fs"
 import path from "node:path"
+import { db } from "./db"
+import { usersTable } from "./db/schema"
+import { validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod'
+import { z } from 'zod/v4'
 
 import Counter from "./components/Counter"
 import MainLayout from "./layouts/MainLayout"
+import { el } from "zod/locales"
 
-const app = Fastify()
+const app = Fastify().withTypeProvider<ZodTypeProvider>().setValidatorCompiler(validatorCompiler)
 
 app.register(fastifyHtml)
 
@@ -110,5 +115,53 @@ app.get("/public/*", (req, reply) => {
     .send(content)
 })
 
-app.listen({ port: 3000, host: "0.0.0.0" })
-console.log("App is listening on port 3000")
+
+const createUserSchema = {
+  body: z.object({
+    name: z.string(),
+    email: z.email(),
+    lastName: z.string(),
+    userName: z.string()
+  })
+}
+
+app.post("/createUser", {
+  schema: createUserSchema
+}, async(req, res) => {
+  const body = req.body
+
+  await db.insert(usersTable).values(body)
+})
+
+app.get("/listUsers", async(req, res) => {
+    const result = await db.query.usersTable.findMany()
+
+    return res.html(
+      <>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Last Name</th>
+            <th>User Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody>
+          {result.map(user => (
+            <tr>
+              <td>{user.id}</td>
+              <td>{user.name}</td>
+              <td>{user.lastName}</td>
+              <td>{user.userName}</td>
+              <td>{user.email}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      </>
+    )
+})
+app.listen({ port: 3001, host: "0.0.0.0" })
+console.log("App is listening on port 3001")
