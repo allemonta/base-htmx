@@ -4,7 +4,7 @@ type InputProps = {
 
 const Counter = (props: InputProps) => {
     return (
-        <span> Count: {props.count} </span>
+        <span id="counter">Count: {props.count}</span>
     )
 }
 
