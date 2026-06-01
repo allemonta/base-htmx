@@ -1,8 +1,9 @@
 import env from "./utils/env"
 import { join } from "path"
 import { buildSync } from "esbuild"
+import { execSync } from "child_process"
 
-/* Fastify Stuffs */
+/* Fastify plugins */
 import Fastify from "fastify"
 import fastifyHtml from "@kitajs/fastify-html-plugin"
 import { validatorCompiler, ZodTypeProvider } from "fastify-type-provider-zod"
@@ -15,16 +16,15 @@ import fastifyFormbody from "@fastify/formbody"
 /* Router */
 import clientRouter from "./client/router"
 
-/* Handlers */
+/* Error/404 handlers */
 import notFoundHandler from "./handlers/notFound"
 import errorHandler from "./handlers/error"
 
-const server = (
-  Fastify()
-    .withTypeProvider<ZodTypeProvider>()
-    .setValidatorCompiler(validatorCompiler)
-)
+const server = Fastify()
+  .withTypeProvider<ZodTypeProvider>()
+  .setValidatorCompiler(validatorCompiler)
 
+/* Plugins registration */
 server.register(fastifyCookie)
 server.register(fastifySession, {
   secret: env.SESSION_SECRET,
@@ -35,20 +35,19 @@ server.register(fastifyMultipart)
 server.register(fastifyFormbody)
 server.register(fastifyStatic, {
   root: join(import.meta.dirname, "..", "public"),
-  prefix: "/public/"
+  prefix: "/public/",
 })
 
-/* Register handlers */
 notFoundHandler(server)
 errorHandler(server)
 
-/* Register routes */
+/* Routes */
 clientRouter(server)
 
-/* 
-  Build and serve the client script on the fly. 
-  In production, you should pre-build this and serve it as a static file with "build:client" script in package.json
-*/
+/**
+ * Builds the client TypeScript on the fly with esbuild and serves it as JS.
+ * In production, use the "build:client" script and serve the static file.
+ */
 server.get("/live-script", (_req, reply) => {
   const result = buildSync({
     entryPoints: [join(import.meta.dirname, "client", "index.ts")],
@@ -59,9 +58,21 @@ server.get("/live-script", (_req, reply) => {
   })
 
   const script = result.outputFiles[0].text
-  return reply
-    .type("application/javascript")
-    .send(script)
+  return reply.type("application/javascript").send(script)
+})
+
+/**
+ * Builds Tailwind CSS on the fly by scanning project files.
+ * In production, pre-build and serve as a static file.
+ */
+server.get("/live-style", (_req, reply) => {
+  const input = join(import.meta.dirname, "client", "styles.css")
+  const bin = join(import.meta.dirname, "..", "node_modules", ".bin", "tailwindcss")
+  const css = execSync(`${bin} -i ${input} --minify`, {
+    encoding: "utf-8",
+  })
+
+  return reply.type("text/css").send(css)
 })
 
 server.listen({ port: +env.PORT, host: "0.0.0.0" })

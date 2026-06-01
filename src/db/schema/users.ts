@@ -11,7 +11,7 @@ import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core"
 
 export const usersTable = sqliteTable("users", {
   //id
-  id: integer().primaryKey({autoIncrement: true}),
+  id: integer().primaryKey({ autoIncrement: true }),
   //name
   name: text().notNull(),
   //userName
@@ -21,7 +21,7 @@ export const usersTable = sqliteTable("users", {
   //email
   email: text().notNull().unique(),
   //phone
-  phone: integer()
+  phone: integer(),
 })
 
-type User =  typeof usersTable.$inferSelect
+type User = typeof usersTable.$inferSelect

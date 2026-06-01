@@ -3,14 +3,14 @@
  * Esegui con: npx tsx src/db/example.ts
  */
 import { db } from "./index"
-import { usersTable } from  "./schema"
+import { usersTable } from "./schema"
 
-const main2 = async() => {
+const main2 = async () => {
   const newUser = {
     email: "rossia@gmail.com",
     name: "Mario",
     lastName: "Rossi",
-    userName: "marietasdto"
+    userName: "marietasdto",
   }
 
   // const existingUser = await db
@@ -27,22 +27,22 @@ const main2 = async() => {
     where: {
       OR: [
         {
-          email: newUser.email
+          email: newUser.email,
         },
         {
-          userName: newUser.userName
-        }
-      ]
-    }
+          userName: newUser.userName,
+        },
+      ],
+    },
   })
 
-    console.log(existingUser)
-    if (!existingUser) {
-      //creo un utente
-      await db.insert(usersTable).values(newUser)
-    } else {
-      console.log("UTENTE GIÀ CREATO")
-    }
+  console.log(existingUser)
+  if (!existingUser) {
+    //creo un utente
+    await db.insert(usersTable).values(newUser)
+  } else {
+    console.log("UTENTE GIÀ CREATO")
+  }
 }
 
 main2()

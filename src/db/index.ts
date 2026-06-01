@@ -5,6 +5,4 @@ import path from "node:path"
 
 const dbPath = path.join(process.cwd(), "sqlite.db")
 
-export const db = drizzle(dbPath, { schema,
-   relations 
-  })
+export const db = drizzle(dbPath, { schema, relations })
