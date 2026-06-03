@@ -14,7 +14,9 @@ import fastifyStatic from "@fastify/static"
 import fastifyFormbody from "@fastify/formbody"
 
 /* Router */
-import clientRouter from "./client/router"
+import viewsRouter from "./client/routers/viewsRouter"
+import partialsRouter from "./client/routers/partialsRouter"
+import actionsRouter from "./client/routers/actionsRouter"
 
 /* Error/404 handlers */
 import notFoundHandler from "./handlers/notFound"
@@ -42,7 +44,9 @@ notFoundHandler(server)
 errorHandler(server)
 
 /* Routes */
-clientRouter(server)
+viewsRouter(server)
+partialsRouter(server)
+actionsRouter(server)
 
 /**
  * Builds the client TypeScript on the fly with esbuild and serves it as JS.
@@ -50,7 +54,7 @@ clientRouter(server)
  */
 server.get("/live-script", (_req, reply) => {
   const result = buildSync({
-    entryPoints: [join(import.meta.dirname, "client", "index.ts")],
+    entryPoints: [join(import.meta.dirname, "client", "scripts", "index.ts")],
     bundle: true,
     minify: true,
     write: false,
@@ -66,7 +70,7 @@ server.get("/live-script", (_req, reply) => {
  * In production, pre-build and serve as a static file.
  */
 server.get("/live-style", (_req, reply) => {
-  const input = join(import.meta.dirname, "client", "styles.css")
+  const input = join(import.meta.dirname, "client", "styles", "index.css")
   const bin = join(import.meta.dirname, "..", "node_modules", ".bin", "tailwindcss")
   const css = execSync(`${bin} -i ${input} --minify`, {
     encoding: "utf-8",

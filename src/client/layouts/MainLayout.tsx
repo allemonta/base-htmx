@@ -1,10 +1,10 @@
 import { PropsWithChildren } from "@kitajs/html"
 
-type InputProps = PropsWithChildren<{
+type LayoutProps = PropsWithChildren<{
   title?: string
 }>
 
-export default (props: InputProps) => {
+export default (props: LayoutProps) => {
   const { children } = props
   const title = props?.title || "My Webapp"
 
@@ -19,6 +19,9 @@ export default (props: InputProps) => {
 
       <body class="bg-gray-50 text-gray-900 leading-relaxed">
         {children}
+        
+        <div id={"toast"} />
+        <div id={"modal"} />
         <script src="/live-script"></script>
       </body>
     </html>
